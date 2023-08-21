@@ -1,66 +1,153 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Senior Fullstack Developer Test
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Welcome, developer!
 
-## About Laravel
+This is the repository of the REST API of _Chipper_, a fictional microblogging application. It has the following features:
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+### Registration
+- A guest can register
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+### Authentication
+- A user can login with email and password
+- A users can not authenticate with an invalid password
+- A user can logout
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+### Post
+- A guest can not create a post
+- A user can create a post
+- A user can update a post
+- A user can update a post by other user
+- A user can destroy one of his posts
 
-## Learning Laravel
+### Favorite
+- A guest can not favorite a post
+- A user can favorite a post
+- A user can remove a post from his favorites
+- A user can not remove a non favorited item
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+As part of our interview process, we'd like to invite you to tackle a technical challenge and share your solution with us. Are you ready? Let's get started!
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+# Tasks
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains over 2000 video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+Please invest some time in acquainting yourself with the codebase, including Models, Controllers, and the database structure. Then, proceed to address the following tasks one by one.
 
-## Laravel Sponsors
+## 1. Add the ability for users to favorite users
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the Laravel [Patreon page](https://patreon.com/taylorotwell).
+At present, users have the option to mark posts as favorites. 
 
-### Premium Partners
+The goal of this task is to expand this functionality to allow users to also designate their favorite _users_. Imagine this as a "follow" feature.
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Cubet Techno Labs](https://cubettech.com)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[Many](https://www.many.co.uk)**
-- **[Webdock, Fast VPS Hosting](https://www.webdock.io/en)**
-- **[DevSquad](https://devsquad.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[OP.GG](https://op.gg)**
-- **[WebReinvent](https://webreinvent.com/?utm_source=laravel&utm_medium=github&utm_campaign=patreon-sponsors)**
-- **[Lendio](https://lendio.com)**
+We'd like to use the following routes:
 
-## Contributing
+`POST users/{user}/favorite` to add a user to my list of favorites.
+`DELETE users/{user}/favorite` to remove a favorited user from my list of favorites.
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+To achieve this, we need to deprecate the `post_id` column in the `favorites` table. Instead, we'll introduce new columns that support a polymorphic relationship. This relationship will allow the creation of favorites for various models. In this case, `User`.
 
-## Code of Conduct
+It's important to note that the database is already in production. Therefore, you should create new migrations for this task rather than modifying the existing ones.
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+Please make sure to add testing to the feature, to make sure the user can favorite authors and still can favorite posts. Include all the relevant tests in the `tests/Feature/FavoriteTest.php`.
 
-## Security Vulnerabilities
+Make sure a user can't favorite himself.
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+✋ **BEFORE YOU BEGIN**
 
-## License
+Please update the following line in this `README.md` file to include your estimate of the time required for completion.
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+Estimated Time Required: [Your Estimate Here]
+
+After updating the estimate, commit your changes using the following command:
+`git add README.md && git commit -m "Task 1 estimated" && git push`
+
+Please make sure to commit this right before you start working on the task.
+
+🏁 **ONCE YOU HAVE COMPLETED THE TASK**
+
+After implementing the changes, commit your work using the following commands:
+`git add -A && git commit -m "Added the ability for users to favorite authors" && git push`
+
+## 2. Update the payload of `GET /favorites` to list posts and users
+
+The objective of this task is to modify the endpoint responsible for providing a user's list of favorites. Currently, the endpoint simply offers a list of all favorites, but our requirement is for it to return a JSON structure like this:
+
+```
+{
+  "data": {
+    "posts": [
+      {
+        "id": 1,
+        "title": "All about cats",
+        "body": "Lorem Ipsum...",
+        "user": { "id": 5, "name": "Jack" }
+      },
+      {
+        "id": 1,
+        "title": "All about dogs",
+        "body": "Lorem Ipsum...",
+        "user": { "id": 1, "name": "Zara" }
+      }
+    ],
+    "users": [
+      { "id": 5, "name": "Jack" },
+      { "id": 8, "name": "Jane" },
+      { "id": 9, "name": "Luke" }
+    ]
+  }
+}
+```
+
+As in the previous task, please make sure to add the relevant tests in `tests/Feature/FavoriteTest.php`.
+
+✋ **BEFORE YOU BEGIN**
+
+Please update the following line in this `README.md` file to include your estimate of the time required for completion.
+
+Estimated Time Required: [Your Estimate Here]
+
+After updating the estimate, commit your changes using the following command:
+`git add README.md && git commit -m "Task 2 estimated" && git push`
+
+Please make sure to commit this right before you start working on the task.
+
+🏁 **ONCE YOU HAVE COMPLETED THE TASK**
+
+After implementing the changes, commit your work using the following commands:
+`git add -A && git commit -m "Updated structure of favorites index payload" && git push`
+
+## 3. Notify a user whenever one of their favored users creates a new post.
+
+The users of Chipper want to stay up to date with the people they are following.
+
+Every time a user creates a new post, the system should notify via email to all the users who have them in their list of favorites. The goal of this task is to code that feature.
+
+Please use [Laravel notifications](https://laravel.com/docs/10.x/notifications). The users should be notified by email only.
+
+For development, feel free to use a service like Mailtrap and the `smtp` driver to send your email messages to a "dummy" mailbox. For testing, the `array` driver is fine.
+
+It is of utmost importance that the process of delivering these emails does not lead to delays in the API response for the `POST /posts` endpoint.
+
+In addition to the implementation, please ensure comprehensive test coverage for this new feature.
+
+✋ **BEFORE YOU BEGIN**
+
+Please update the following line in this `README.md` file to include your estimate of the time required for completion.
+
+Estimated Time Required: [Your Estimate Here]
+
+After updating the estimate, commit your changes using the following command:
+`git add README.md && git commit -m "Task 3 estimated" && git push`
+
+Please make sure to commit this right before you start working on the task.
+
+🏁 **ONCE YOU HAVE COMPLETED THE TASK**
+
+After implementing the feature, commit your work using the following commands:
+`git add -A && git commit -m "Added notification for users when new post of favorite user is created" && git push`
+
+# Ready for the next challenge?
+
+Congratulations! You completed the first part of this interview coding challenge. We'll now leave the API behind and enter the front-end realm.
+
+Please go to this repository and follow the instructions. Thank you and good luck!
+
+
