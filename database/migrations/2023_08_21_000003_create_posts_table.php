@@ -14,8 +14,7 @@ return new class () extends Migration {
             $table->bigIncrements('id');
             $table->string('title');
             $table->text('body');
-            $table->unsignedBigInteger('author_id');
-
+            $table->foreignId('user_id')->constrained();
             $table->timestamps();
         });
     }

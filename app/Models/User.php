@@ -46,13 +46,13 @@ class User extends Authenticatable
         'password' => 'hashed',
     ];
 
-    public function author(): HasOne
-    {
-        return $this->hasOne(Author::class);
-    }
-
     public function favorites(): HasMany
     {
         return $this->hasMany(Favorite::class);
+    }
+
+    public function posts(): HasMany
+    {
+        return $this->hasMany(Post::class);
     }
 }

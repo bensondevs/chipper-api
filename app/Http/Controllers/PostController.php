@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Author;
 use App\Http\Resources\PostResource;
 use App\Models\Post;
 use App\Http\Requests\CreatePostRequest;
@@ -26,14 +25,11 @@ class PostController extends Controller
     {
         $user = $request->user();
 
-        // Create or retrieve the author for the logged-in user
-        $author = Author::firstOrCreate(['user_id' => $user->id]);
-
         // Create a new post
         $post = Post::create([
             'title' => $request->input('title'),
             'body' => $request->input('body'),
-            'author_id' => $author->id,
+            'user_id' => $user->id,
         ]);
 
         return new PostResource($post);

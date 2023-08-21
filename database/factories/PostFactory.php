@@ -24,7 +24,7 @@ class PostFactory extends Factory
         return [
             'title' => $this->faker->sentence(10),
             'body' => $this->faker->text(),
-            'author_id' => \App\Models\Author::factory(),
+            'user_id' => \App\Models\User::factory(),
         ];
     }
 }

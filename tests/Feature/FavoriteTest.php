@@ -11,8 +11,7 @@ class FavoriteTest extends TestCase
 {
     use DatabaseMigrations;
 
-    /** @test */
-    public function it_can_not_favorite_a_post_as_guest()
+    public function test_a_guest_can_not_favorite_a_post()
     {
         $post = Post::factory()->create();
 
@@ -20,8 +19,7 @@ class FavoriteTest extends TestCase
             ->assertForbidden();
     }
 
-    /** @test */
-    public function it_can_favorite_a_post()
+    public function test_a_user_can_favorite_a_post()
     {
         $user = User::factory()->create();
         $post = Post::factory()->create();
@@ -36,8 +34,7 @@ class FavoriteTest extends TestCase
         ]);
     }
 
-    /** @test */
-    public function it_can_remove_a_post_from_favorites()
+    public function test_a_user_can_remove_a_post_from_his_favorites()
     {
         $user = User::factory()->create();
         $post = Post::factory()->create();
@@ -61,8 +58,7 @@ class FavoriteTest extends TestCase
         ]);
     }
 
-    /** @test */
-    public function it_can_not_remove_a_non_favorited_item()
+    public function test_a_user_can_not_remove_a_non_favorited_item()
     {
         $user = User::factory()->create();
         $post = Post::factory()->create();

@@ -9,7 +9,7 @@ class UpdatePostRequest extends FormRequest
     public function authorize()
     {
         $post = $this->route('post');
-        return $this->user()->id === $post->author->user_id;
+        return $this->user()->id === $post->user_id;
     }
 
     public function rules()

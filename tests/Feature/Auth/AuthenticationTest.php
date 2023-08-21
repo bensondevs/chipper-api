@@ -11,7 +11,7 @@ class AuthenticationTest extends TestCase
 {
     use DatabaseMigrations;
 
-    public function test_users_can_authenticate_using_the_login_screen(): void
+    public function test_a_user_can_login_with_email_and_password(): void
     {
         $user = User::factory()->create();
 
@@ -24,7 +24,7 @@ class AuthenticationTest extends TestCase
         $response->assertJsonStructure(['data' => ['name', 'email'], 'token']);
     }
 
-    public function test_users_can_not_authenticate_with_invalid_password(): void
+    public function test_a_users_can_not_authenticate_with_an_invalid_password(): void
     {
         $user = User::factory()->create();
 
@@ -37,7 +37,7 @@ class AuthenticationTest extends TestCase
         $response->assertJsonStructure(['message', 'errors' => ['email']]);
     }
 
-    public function test_user_can_logout()
+    public function test_a_user_can_logout()
     {
         $user = User::factory()->create();
 

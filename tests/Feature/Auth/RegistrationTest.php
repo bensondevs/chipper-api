@@ -9,7 +9,7 @@ class RegistrationTest extends TestCase
 {
     use DatabaseMigrations;
 
-    public function test_new_users_can_register(): void
+    public function test_a_guest_can_register(): void
     {
         $response = $this->json('POST', route('register'), [
             'name' => 'Test',

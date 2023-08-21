@@ -11,8 +11,7 @@ class PostTest extends TestCase
 {
     use DatabaseMigrations;
 
-    /** @test */
-    public function it_can_not_create_a_post_as_guest()
+    public function test_a_guest_can_not_create_a_post()
     {
         $response = $this->postJson(route('posts.store'), [
             'title' => 'Test Post',
@@ -22,8 +21,7 @@ class PostTest extends TestCase
         $response->assertForbidden();
     }
 
-    /** @test */
-    public function it_can_create_a_post()
+    public function test_a_user_can_create_a_post()
     {
         $user = User::factory()->create();
 
@@ -49,14 +47,9 @@ class PostTest extends TestCase
             'title' => 'Test Post',
             'body' => 'This is a test post.',
         ]);
-
-        $this->assertDatabaseHas('authors', [
-            'user_id' => $user->id,
-        ]);
     }
 
-    /** @test */
-    public function it_can_update_a_post()
+    public function test_a_user_can_update_a_post()
     {
         $user = User::factory()->create();
 
@@ -87,8 +80,7 @@ class PostTest extends TestCase
         ]);
     }
 
-    /** @test */
-    public function it_can_not_update_a_post_by_other_author()
+    public function test_a_user_can_update_a_post_by_other_user()
     {
         $john = User::factory()->create(['name' => 'John']);
         $jack = User::factory()->create(['name' => 'Jack']);
@@ -114,8 +106,7 @@ class PostTest extends TestCase
         ]);
     }
 
-    /** @test */
-    public function it_can_destroy_a_post()
+    public function test_a_user_can_destroy_one_of_his_posts()
     {
         $user = User::factory()->create();
 
