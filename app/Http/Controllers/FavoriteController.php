@@ -23,9 +23,14 @@ class FavoriteController extends Controller
 {
     public function index(Request $request)
     {
-        $favorites = $request->user()->favorites;
+        $favorites = $request->user()->favorites()
+            ->with(['favoritable' => fn ($morphTo) => $morphTo->morphWith([
+                Post::class => ['user'],
+                User::class => [],
+            ])])
+            ->get();
 
-        return FavoriteResource::collection($favorites);
+        return new FavoriteResource($favorites);
     }
 
     public function store(

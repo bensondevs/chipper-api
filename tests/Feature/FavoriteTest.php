@@ -333,4 +333,58 @@ class FavoriteTest extends TestCase
             'favoritable_type' => User::class,
         ]);
     }
+
+    public function test_a_user_can_get_their_favorites_grouped_by_type()
+    {
+        $user = User::factory()->create();
+        $postAuthor = User::factory()->create();
+        $post1 = Post::factory()->for($postAuthor, 'user')->create();
+        $post2 = Post::factory()->for($postAuthor, 'user')->create();
+        $favoritedUser = User::factory()->create();
+
+        // Create favorites
+        $favorite1 = new Favorite();
+        $favorite1->user()->associate($user);
+        $favorite1->favoritable()->associate($post1);
+        $favorite1->save();
+
+        $favorite2 = new Favorite();
+        $favorite2->user()->associate($user);
+        $favorite2->favoritable()->associate($post2);
+        $favorite2->save();
+
+        $favorite3 = new Favorite();
+        $favorite3->user()->associate($user);
+        $favorite3->favoritable()->associate($favoritedUser);
+        $favorite3->save();
+
+        $response = $this->actingAs($user)
+            ->getJson(route('favorites.index'))
+            ->assertOk()
+            ->assertJsonStructure([
+                'data' => [
+                    'posts' => [
+                        '*' => ['id', 'title', 'body', 'user' => ['id', 'name']],
+                    ],
+                    'users' => [
+                        '*' => ['id', 'name'],
+                    ],
+                ],
+            ]);
+
+        $responseData = $response->json('data');
+
+        $this->assertCount(2, $responseData['posts']);
+        $this->assertCount(1, $responseData['users']);
+
+        $this->assertEquals($post1->id, $responseData['posts'][0]['id']);
+        $this->assertEquals($post2->id, $responseData['posts'][1]['id']);
+        $this->assertEquals($favoritedUser->id, $responseData['users'][0]['id']);
+        $this->assertEquals($favoritedUser->name, $responseData['users'][0]['name']);
+
+        // Verify posts have user relationship
+        $this->assertArrayHasKey('user', $responseData['posts'][0]);
+        $this->assertEquals($postAuthor->id, $responseData['posts'][0]['user']['id']);
+        $this->assertEquals($postAuthor->name, $responseData['posts'][0]['user']['name']);
+    }
 }
