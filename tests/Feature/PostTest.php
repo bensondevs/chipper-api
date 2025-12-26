@@ -2,9 +2,9 @@
 
 namespace Tests\Feature;
 
-use Illuminate\Support\Arr;
 use App\Models\User;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
+use Illuminate\Support\Arr;
 use Tests\TestCase;
 
 class PostTest extends TestCase
@@ -34,13 +34,13 @@ class PostTest extends TestCase
             ->assertJsonStructure([
                 'data' => [
                     'id', 'title', 'body',
-                ]
+                ],
             ])
             ->assertJson([
                 'data' => [
                     'title' => 'Test Post',
                     'body' => 'This is a test post.',
-                ]
+                ],
             ]);
 
         $this->assertDatabaseHas('posts', [
@@ -70,7 +70,7 @@ class PostTest extends TestCase
                 'data' => [
                     'title' => 'Updated title',
                     'body' => 'Updated body.',
-                ]
+                ],
             ]);
 
         $this->assertDatabaseHas('posts', [

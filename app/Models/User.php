@@ -3,6 +3,9 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
@@ -45,13 +48,21 @@ class User extends Authenticatable
         'password' => 'hashed',
     ];
 
-    public function favorites(): HasMany
+    public function favorites(): MorphMany
     {
-        return $this->hasMany(Favorite::class);
+        return $this->morphMany(Favorite::class, 'favoritable');
     }
 
     public function posts(): HasMany
     {
         return $this->hasMany(Post::class);
+    }
+
+    public function hasMarkedFavorite(Model $favoritable): bool
+    {
+        return Favorite::query()
+            ->whereBelongsTo($this, 'user')
+            ->whereMorphedTo('favoritable', $favoritable)
+            ->exists();
     }
 }

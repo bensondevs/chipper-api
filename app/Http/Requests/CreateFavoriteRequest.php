@@ -11,7 +11,7 @@ class CreateFavoriteRequest extends FormRequest
         return $this->user();
     }
 
-    public function rules()
+    public function rules(): array
     {
         return [];
     }

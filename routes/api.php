@@ -1,6 +1,5 @@
 <?php
 
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\LoginController;
@@ -31,4 +30,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('favorites', [FavoriteController::class, 'index'])->name('favorites.index');
     Route::post('posts/{post}/favorite', [FavoriteController::class, 'store'])->name('favorites.store');
     Route::delete('posts/{post}/favorite', [FavoriteController::class, 'destroy'])->name('favorites.destroy');
+    Route::post('users/{user}/favorite', [FavoriteController::class, 'storeUser'])->name('favorites.storeUser');
+    Route::delete('users/{user}/favorite', [FavoriteController::class, 'destroyUser'])->name('favorites.destroyUser');
 });
