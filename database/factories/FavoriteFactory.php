@@ -3,6 +3,8 @@
 namespace Database\Factories;
 
 use App\Models\Favorite;
+use App\Models\Post;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class FavoriteFactory extends Factory
@@ -21,29 +23,42 @@ class FavoriteFactory extends Factory
      */
     public function definition(): array
     {
-        $post = \App\Models\Post::factory()->create();
-        
         return [
-            'post_id' => $post->id, // Keep for backward compatibility
-            'user_id' => \App\Models\User::factory(),
-            'favoritable_id' => $post->id,
-            'favoritable_type' => \App\Models\Post::class,
+            'user_id' => User::factory(),
+            'favoritable_id' => Post::factory(),
+            'favoritable_type' => Post::class,
         ];
     }
 
     /**
-     * Indicate that the favorite is for a user.
+     * Indicate that the favorite is for a user instead of a post.
      *
+     * @param  \App\Models\User|null  $user
      * @return $this
      */
-    public function forUser(\App\Models\User $user = null): static
+    public function forUser(User $user = null): static
     {
-        $user = $user ?? \App\Models\User::factory()->create();
+        $user = $user ?? User::factory()->create();
         
         return $this->state(fn (array $attributes) => [
-            'post_id' => null,
             'favoritable_id' => $user->id,
-            'favoritable_type' => \App\Models\User::class,
+            'favoritable_type' => User::class,
+        ]);
+    }
+
+    /**
+     * Indicate that the favorite is for a post.
+     *
+     * @param  \App\Models\Post|null  $post
+     * @return $this
+     */
+    public function forPost(Post $post = null): static
+    {
+        $post = $post ?? Post::factory()->create();
+        
+        return $this->state(fn (array $attributes) => [
+            'favoritable_id' => $post->id,
+            'favoritable_type' => Post::class,
         ]);
     }
 }

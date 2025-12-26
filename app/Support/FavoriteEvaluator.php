@@ -9,7 +9,9 @@ class FavoriteEvaluator
 {
     protected ?string $reason = null;
 
-    public function __construct(protected User $user) {}
+    public function __construct(protected User $user)
+    {
+    }
 
     public static function for(User $user): static
     {

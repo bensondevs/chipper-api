@@ -11,7 +11,7 @@ class CreatePostRequest extends FormRequest
         return $this->user();
     }
 
-    public function rules()
+    public function rules(): array
     {
         return [
             'title' => 'required|string|max:255',

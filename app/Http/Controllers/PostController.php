@@ -2,11 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Actions\Post\CreatePost;
+use App\Http\Requests\CreatePostRequest;
+use App\Http\Requests\DestroyPostRequest;
+use App\Http\Requests\UpdatePostRequest;
 use App\Http\Resources\PostResource;
 use App\Models\Post;
-use App\Http\Requests\CreatePostRequest;
-use App\Http\Requests\UpdatePostRequest;
-use App\Http\Requests\DestroyPostRequest;
 
 /**
  * @group Posts
@@ -17,20 +18,20 @@ class PostController extends Controller
 {
     public function index()
     {
-        $posts = Post::with('user')->orderByDesc('created_at')->get();
+        $posts = Post::with('user')
+            ->orderByDesc('created_at')
+            ->get();
+
         return PostResource::collection($posts);
     }
 
-    public function store(CreatePostRequest $request)
+    public function store(CreatePostRequest $request, CreatePost $createPost)
     {
-        $user = $request->user();
-
-        // Create a new post
-        $post = Post::create([
-            'title' => $request->input('title'),
-            'body' => $request->input('body'),
-            'user_id' => $user->id,
-        ]);
+        $post = $createPost(
+            user: $request->user(),
+            title: $request->input('title'),
+            body: $request->input('body'),
+        );
 
         return new PostResource($post);
     }
