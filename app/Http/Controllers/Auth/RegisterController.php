@@ -2,11 +2,10 @@
 
 namespace App\Http\Controllers\Auth;
 
+use App\Actions\User\CreateUser;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\UserResource;
-use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 
@@ -35,11 +34,12 @@ class RegisterController extends Controller
      * @bodyParam password string required New password.
      *
      * @unauthenticated
+     *
      * @response {"data":{"name":"Gust Olson","email":"gschuster@example.com"},"token":"1|b5liQC0bP33jtCddheSiVp3c6ZnbiddKvDf36AxI"}
      *
      * @return \Illuminate\Http\Response
      */
-    public function __invoke(Request $request)
+    public function __invoke(Request $request, CreateUser $createUser)
     {
         $validator = $this->validator($request->all());
 
@@ -49,12 +49,12 @@ class RegisterController extends Controller
 
         $data = $validator->validated();
 
-        $user = User::create([
-            'name'              => $data['name'],
-            'email'             => $data['email'],
-            'password'          => Hash::make($data['password']),
-            'email_verified_at' => config('app.must_verify_email') ? null : now(),
-        ]);
+        $user = $createUser(
+            name: $data['name'],
+            email: $data['email'],
+            password: $data['password'],
+            verifyEmail: ! config('app.must_verify_email'),
+        );
 
         $token = $user->createToken('web');
 
@@ -71,9 +71,9 @@ class RegisterController extends Controller
     protected function validator(array $data)
     {
         return Validator::make($data, [
-            'name'   => ['required', 'string', 'max:255'],
-            'email'        => ['required', 'string', 'email', 'max:255', Rule::unique('users')->ignore($user ?? null)],
-            'password'     => ['required', 'string', 'min:8', 'max:255', 'confirmed'],
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users')->ignore($user ?? null)],
+            'password' => ['required', 'string', 'min:8', 'max:255', 'confirmed'],
         ]);
     }
 }
