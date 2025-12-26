@@ -9,14 +9,22 @@ use App\Models\Post;
 use App\Models\User;
 use App\Notifications\Post\FavoriteUserNewPost;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class PostTest extends TestCase
 {
     use DatabaseMigrations;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        Storage::fake('public');
+    }
 
     public function test_a_guest_can_view_posts()
     {
@@ -31,7 +39,7 @@ class PostTest extends TestCase
         $response->assertOk()
             ->assertJsonStructure([
                 'data' => [
-                    '*' => ['id', 'title', 'body', 'user' => ['id', 'name']],
+                    '*' => ['id', 'title', 'body', 'image', 'user' => ['id', 'name']],
                 ],
             ]);
     }
@@ -47,7 +55,7 @@ class PostTest extends TestCase
 
         $response->assertOk();
         $posts = $response->json('data');
-        
+
         $this->assertCount(3, $posts);
         $this->assertEquals($post2->id, $posts[0]['id']);
         $this->assertEquals($post3->id, $posts[1]['id']);
@@ -68,6 +76,7 @@ class PostTest extends TestCase
                         'id' => $post->id,
                         'title' => $post->title,
                         'body' => $post->body,
+                        'image' => null,
                         'user' => [
                             'id' => $user->id,
                             'name' => 'John Doe',
@@ -89,7 +98,7 @@ class PostTest extends TestCase
 
         $response->assertOk()
             ->assertJsonStructure([
-                'data' => ['id', 'title', 'body'],
+                'data' => ['id', 'title', 'body', 'image'],
             ])
             ->assertJson([
                 'data' => [
@@ -142,7 +151,7 @@ class PostTest extends TestCase
         $response->assertCreated()
             ->assertJsonStructure([
                 'data' => [
-                    'id', 'title', 'body',
+                    'id', 'title', 'body', 'image',
                 ],
             ])
             ->assertJson([
@@ -218,6 +227,84 @@ class PostTest extends TestCase
 
         $response->assertUnprocessable()
             ->assertJsonValidationErrors(['title']);
+    }
+
+    public function test_a_user_can_create_a_post_with_image()
+    {
+        Event::fake([PostCreated::class]);
+        Notification::fake();
+
+        $user = User::factory()->create();
+        $image = UploadedFile::fake()->image('post-image.jpg', 800, 600);
+
+        $response = $this->actingAs($user)->post(route('posts.store'), [
+            'title' => 'Test Post with Image',
+            'body' => 'This is a test post with an image.',
+            'image' => $image,
+        ]);
+
+        $response->assertCreated()
+            ->assertJsonStructure([
+                'data' => [
+                    'id', 'title', 'body', 'image',
+                ],
+            ])
+            ->assertJson([
+                'data' => [
+                    'title' => 'Test Post with Image',
+                    'body' => 'This is a test post with an image.',
+                ],
+            ]);
+
+        $postId = Arr::get($response->json(), 'data.id');
+        $post = Post::find($postId);
+
+        $this->assertNotNull($post->getFirstMediaUrl('images'));
+        $this->assertDatabaseHas('posts', [
+            'title' => 'Test Post with Image',
+            'body' => 'This is a test post with an image.',
+            'user_id' => $user->id,
+        ]);
+
+        Event::assertDispatched(PostCreated::class, function ($event) use ($postId) {
+            return $event->post->id === $postId;
+        });
+    }
+
+    public function test_create_post_image_must_be_valid_image()
+    {
+        $user = User::factory()->create();
+        $file = UploadedFile::fake()->create('document.pdf', 1000);
+
+        $response = $this->actingAs($user)
+            ->withHeaders(['Accept' => 'application/json'])
+            ->post(route('posts.store'), [
+                'title' => 'Test Post',
+                'body' => 'This is a test post.',
+                'image' => $file,
+            ]);
+
+        $response->assertUnprocessable()
+            ->assertJsonValidationErrors(['image']);
+    }
+
+    public function test_create_post_image_must_not_exceed_max_size()
+    {
+        $user = User::factory()->create();
+        // Create a fake image that's larger than 10MB (10240 KB)
+        // Validation uses kilobytes, so 11MB = 11 * 1024 KB = 11264 KB
+        $image = UploadedFile::fake()->image('large-image.jpg')->size(11 * 1024 * 1024); // 11MB in bytes
+
+        $response = $this->actingAs($user)
+            ->withHeaders(['Accept' => 'application/json'])
+            ->post(route('posts.store'), [
+                'title' => 'Test Post',
+                'body' => 'This is a test post.',
+                'image' => $image,
+            ]);
+
+        $response->assertUnprocessable()
+            ->assertJsonValidationErrors(['image']);
     }
 
     public function test_a_user_can_update_a_post()
@@ -315,6 +402,109 @@ class PostTest extends TestCase
 
         $response->assertUnprocessable()
             ->assertJsonValidationErrors(['title']);
+    }
+
+    public function test_a_user_can_update_a_post_with_image()
+    {
+        $user = User::factory()->create();
+        $post = Post::factory()->for($user, 'user')->create([
+            'title' => 'Original title',
+            'body' => 'Original body.',
+        ]);
+
+        $image = UploadedFile::fake()->image('updated-image.jpg', 800, 600);
+
+        $response = $this->actingAs($user)->post(route('posts.update', ['post' => $post]), [
+            '_method' => 'PUT',
+            'title' => 'Updated title',
+            'body' => 'Updated body.',
+            'image' => $image,
+        ]);
+
+        $response->assertOk()
+            ->assertJson([
+                'data' => [
+                    'title' => 'Updated title',
+                    'body' => 'Updated body.',
+                ],
+            ]);
+
+        $post->refresh();
+        $this->assertNotNull($post->getFirstMediaUrl('images'));
+        $this->assertDatabaseHas('posts', [
+            'title' => 'Updated title',
+            'body' => 'Updated body.',
+            'id' => $post->id,
+        ]);
+    }
+
+    public function test_a_user_can_update_a_post_image_replaces_old_image()
+    {
+        $user = User::factory()->create();
+        $post = Post::factory()->for($user, 'user')->create([
+            'title' => 'Original title',
+            'body' => 'Original body.',
+        ]);
+
+        $firstImage = UploadedFile::fake()->image('first-image.jpg');
+        $post->addMedia($firstImage)->toMediaCollection('images');
+        $firstImageUrl = $post->getFirstMediaUrl('images');
+
+        $secondImage = UploadedFile::fake()->image('second-image.jpg');
+
+        $response = $this->actingAs($user)->post(route('posts.update', ['post' => $post]), [
+            '_method' => 'PUT',
+            'title' => 'Updated title',
+            'body' => 'Updated body.',
+            'image' => $secondImage,
+        ]);
+
+        $response->assertOk();
+
+        $post->refresh();
+        $secondImageUrl = $post->getFirstMediaUrl('images');
+        $this->assertNotEquals($firstImageUrl, $secondImageUrl);
+        $this->assertNotNull($secondImageUrl);
+    }
+
+    public function test_update_post_image_must_be_valid_image()
+    {
+        $user = User::factory()->create();
+        $post = Post::factory()->for($user, 'user')->create();
+        $file = UploadedFile::fake()->create('document.pdf', 1000);
+
+        $response = $this->actingAs($user)
+            ->withHeaders(['Accept' => 'application/json'])
+            ->post(route('posts.update', ['post' => $post]), [
+                '_method' => 'PUT',
+                'title' => 'Updated title',
+                'body' => 'Updated body.',
+                'image' => $file,
+            ]);
+
+        $response->assertUnprocessable()
+            ->assertJsonValidationErrors(['image']);
+    }
+
+    public function test_update_post_image_must_not_exceed_max_size()
+    {
+        $user = User::factory()->create();
+        $post = Post::factory()->for($user, 'user')->create();
+        // Create a fake image that's larger than 10MB (10240 KB)
+        // Validation uses kilobytes, so 11MB = 11 * 1024 KB = 11264 KB
+        $image = UploadedFile::fake()->image('large-image.jpg')->size(11 * 1024 * 1024); // 11MB in bytes
+
+        $response = $this->actingAs($user)
+            ->withHeaders(['Accept' => 'application/json'])
+            ->post(route('posts.update', ['post' => $post]), [
+                '_method' => 'PUT',
+                'title' => 'Updated title',
+                'body' => 'Updated body.',
+                'image' => $image,
+            ]);
+
+        $response->assertUnprocessable()
+            ->assertJsonValidationErrors(['image']);
     }
 
     public function test_a_user_can_destroy_one_of_his_posts()

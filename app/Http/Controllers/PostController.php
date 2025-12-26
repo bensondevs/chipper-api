@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Actions\Post\CreatePost;
+use App\Actions\Post\UpdatePost;
 use App\Http\Requests\CreatePostRequest;
 use App\Http\Requests\DestroyPostRequest;
 use App\Http\Requests\UpdatePostRequest;
@@ -31,6 +32,7 @@ class PostController extends Controller
             user: $request->user(),
             title: $request->input('title'),
             body: $request->input('body'),
+            image: $request->file('image'),
         );
 
         return new PostResource($post);
@@ -41,12 +43,14 @@ class PostController extends Controller
         return new PostResource($post);
     }
 
-    public function update(UpdatePostRequest $request, Post $post)
+    public function update(UpdatePostRequest $request, Post $post, UpdatePost $updatePost)
     {
-        $post->update([
-            'title' => $request->input('title'),
-            'body' => $request->input('body'),
-        ]);
+        $post = $updatePost(
+            post: $post,
+            title: $request->input('title'),
+            body: $request->input('body'),
+            image: $request->file('image'),
+        );
 
         return new PostResource($post);
     }

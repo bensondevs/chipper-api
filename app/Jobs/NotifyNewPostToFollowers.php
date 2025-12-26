@@ -11,11 +11,14 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\Facades\Notification;
 
 class NotifyNewPostToFollowers implements ShouldQueue
 {
-    use Batchable, Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+    use Batchable;
+    use Dispatchable;
+    use InteractsWithQueue;
+    use Queueable;
+    use SerializesModels;
 
     public function __construct(public int $postId, public array $userIds)
     {
@@ -34,8 +37,10 @@ class NotifyNewPostToFollowers implements ShouldQueue
             return;
         }
 
-        User::query()->eachById(
-            fn (User $user) => $user->notify(new FavoriteUserNewPost($post)),
-        );
+        User::query()
+            ->whereIn('id', $this->userIds)
+            ->eachById(
+                fn (User $user) => $user->notify(new FavoriteUserNewPost($post)),
+            );
     }
 }

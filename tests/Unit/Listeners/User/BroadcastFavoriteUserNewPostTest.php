@@ -61,7 +61,7 @@ class BroadcastFavoriteUserNewPostTest extends TestCase
 
         $this->assertCount(1, $batches);
         $batch = $batches->first();
-        
+
         // Verify job was created with postId (not Post model)
         $this->assertCount(1, $batch->jobs);
         $job = $batch->jobs[0];
@@ -70,7 +70,7 @@ class BroadcastFavoriteUserNewPostTest extends TestCase
         $this->assertIsInt($job->postId);
         $this->assertContains($follower1->id, $job->userIds);
         $this->assertContains($follower2->id, $job->userIds);
-        
+
         foreach ($batch->jobs as $job) {
             if ($job instanceof NotifyNewPostToFollowers) {
                 $job->handle();
@@ -152,14 +152,14 @@ class BroadcastFavoriteUserNewPostTest extends TestCase
             return str_contains($batch->name, "Notify followers of post #{$post->id}");
         });
         $batch = $batches->first();
-        
+
         // Verify job was created with postId
         $job = $batch->jobs[0];
         $this->assertInstanceOf(NotifyNewPostToFollowers::class, $job);
         $this->assertEquals($post->id, $job->postId);
         $this->assertIsInt($job->postId);
         $this->assertContains($follower->id, $job->userIds);
-        
+
         foreach ($batch->jobs as $job) {
             if ($job instanceof NotifyNewPostToFollowers) {
                 $job->handle();
@@ -215,7 +215,7 @@ class BroadcastFavoriteUserNewPostTest extends TestCase
             return str_contains($batch->name, "Notify followers of post #{$post->id}");
         });
         $batch = $batches->first();
-        
+
         // Verify job was created with postId
         $job = $batch->jobs[0];
         $this->assertInstanceOf(NotifyNewPostToFollowers::class, $job);
@@ -225,7 +225,7 @@ class BroadcastFavoriteUserNewPostTest extends TestCase
         foreach ($followers as $follower) {
             $this->assertContains($follower->id, $job->userIds);
         }
-        
+
         foreach ($batch->jobs as $job) {
             if ($job instanceof NotifyNewPostToFollowers) {
                 $job->handle();
@@ -306,14 +306,14 @@ class BroadcastFavoriteUserNewPostTest extends TestCase
             return str_contains($batch->name, "Notify followers of post #{$post->id}");
         });
         $batch = $batches->first();
-        
+
         // Verify job was created with postId
         $job = $batch->jobs[0];
         $this->assertInstanceOf(NotifyNewPostToFollowers::class, $job);
         $this->assertEquals($post->id, $job->postId);
         $this->assertIsInt($job->postId);
         $this->assertContains($follower->id, $job->userIds);
-        
+
         foreach ($batch->jobs as $job) {
             if ($job instanceof NotifyNewPostToFollowers) {
                 $job->handle();
@@ -334,4 +334,3 @@ class BroadcastFavoriteUserNewPostTest extends TestCase
         );
     }
 }
-

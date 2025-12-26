@@ -17,6 +17,7 @@ class PostResource extends JsonResource
             'id' => $this->getKey(),
             'title' => $this->title,
             'body' => $this->body,
+            'image' => $this->getFirstMediaUrl('images') ?: null,
             'user' => $this->whenLoaded(
                 'user',
                 fn () => [

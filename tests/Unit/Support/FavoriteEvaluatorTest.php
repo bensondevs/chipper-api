@@ -241,4 +241,3 @@ class FavoriteEvaluatorTest extends TestCase
         $this->assertEquals('You cannot favorite yourself.', $evaluator->getReason());
     }
 }
-

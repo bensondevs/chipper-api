@@ -39,7 +39,7 @@ class FavoriteFactory extends Factory
     public function forUser(User $user = null): static
     {
         $user = $user ?? User::factory()->create();
-        
+
         return $this->state(fn (array $attributes) => [
             'favoritable_id' => $user->id,
             'favoritable_type' => User::class,
@@ -55,7 +55,7 @@ class FavoriteFactory extends Factory
     public function forPost(Post $post = null): static
     {
         $post = $post ?? Post::factory()->create();
-        
+
         return $this->state(fn (array $attributes) => [
             'favoritable_id' => $post->id,
             'favoritable_type' => Post::class,

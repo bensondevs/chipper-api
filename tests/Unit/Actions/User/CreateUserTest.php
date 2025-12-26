@@ -97,4 +97,3 @@ class CreateUserTest extends TestCase
         $this->assertDatabaseCount('users', 2);
     }
 }
-

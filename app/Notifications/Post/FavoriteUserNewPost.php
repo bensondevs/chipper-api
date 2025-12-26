@@ -26,7 +26,7 @@ class FavoriteUserNewPost extends Notification implements ShouldQueue
     {
         $author = $this->post->user;
 
-        return (new MailMessage)
+        return (new MailMessage())
             ->subject("{$author->name} has created a new post")
             ->greeting("Hello {$notifiable->name}!")
             ->line("{$author->name} has just created a new post that you might be interested in.")

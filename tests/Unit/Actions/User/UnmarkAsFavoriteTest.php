@@ -89,4 +89,3 @@ class UnmarkAsFavoriteTest extends TestCase
         );
     }
 }
-

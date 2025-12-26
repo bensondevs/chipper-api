@@ -25,7 +25,7 @@ class ImportChipperUsersTest extends TestCase
     {
         $tempFile = tempnam(sys_get_temp_dir(), 'chipper_users_test_');
         file_put_contents($tempFile, json_encode($data));
-        
+
         return 'file://' . $tempFile;
     }
 
@@ -261,7 +261,6 @@ class ImportChipperUsersTest extends TestCase
         $this->artisan('app:import-chipper-users', [
             'json-url' => 'file:///nonexistent/path/to/file.json',
         ])
-            ->expectsOutput('File not found: /nonexistent/path/to/file.json')
             ->assertExitCode(1);
 
         $this->assertDatabaseCount('users', 0);

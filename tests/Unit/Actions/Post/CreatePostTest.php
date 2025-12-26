@@ -102,4 +102,3 @@ class CreatePostTest extends TestCase
         $this->assertDatabaseCount('posts', 2);
     }
 }
-

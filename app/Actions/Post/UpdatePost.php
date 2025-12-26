@@ -2,31 +2,26 @@
 
 namespace App\Actions\Post;
 
-use App\Events\Post\PostCreated;
 use App\Models\Post;
-use App\Models\User;
 use Illuminate\Http\UploadedFile;
 
-class CreatePost
+class UpdatePost
 {
     public function __invoke(
-        User $user,
+        Post $post,
         string $title,
         string $body,
         UploadedFile $image = null,
     ): Post {
-        $post = new Post();
-        $post->user()->associate($user);
         $post->title = $title;
         $post->body = $body;
         $post->save();
 
         if ($image instanceof UploadedFile) {
+            $post->clearMediaCollection('images');
             $post->addMedia($image)->toMediaCollection('images');
         }
 
-        event(new PostCreated($post));
-
-        return $post;
+        return $post->fresh();
     }
 }

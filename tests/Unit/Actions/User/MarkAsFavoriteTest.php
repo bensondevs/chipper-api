@@ -49,4 +49,3 @@ class MarkAsFavoriteTest extends TestCase
         $this->assertTrue($favorite->favoritable->is($anotherUser));
     }
 }
-
